@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mask Forcing: Improving Autoregressive Video Diffusion Distillation via Dual-Noise Masking Rollout</title>
+
+<meta name="description" content="Mask Forcing is a Dual-Noise Masking Rollout strategy that alleviates the mode-seeking behavior of the reverse-KL objective in DMD, improving autoregressive video diffusion distillation without real video data or additional post-training.">
+<meta name="keywords" content="Mask Forcing, autoregressive video diffusion, video generation, distribution matching distillation, DMD, Self Forcing, LongLive, Causal Forcing, real-time video generation">
+
+<meta property="og:title" content="Mask Forcing: Improving Autoregressive Video Diffusion Distillation via Dual-Noise Masking Rollout">
+<meta property="og:description" content="A Dual-Noise Masking Rollout strategy that alleviates mode-seeking in DMD for autoregressive video diffusion distillation.">
+<meta property="og:image" content="static/images/pipeline.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="static/images/pipeline.png">
+
+<link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="static/images/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="static/images/apple-touch-icon.png">
+<meta name="theme-color" content="#4f46e5">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+<link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+<!-- ============================ NAV ============================ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top">
+      <span class="nav-brand-mark"></span>
+      <span>Mask Forcing</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+      <i class="fas fa-bars"></i>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#method">Method</a></li>
+      <li><a href="#comparisons">Comparisons</a></li>
+      <li><a href="#longvideo">Long Video</a></li>
+      <li><a href="#quantitative">Quantitative</a></li>
+      <li><a href="#ablations">Ablations</a></li>
+    </ul>
+  </div>
+  <div class="nav-progress" id="navProgress"></div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="top">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <!-- <p class="hero-eyebrow">Autoregressive Video Diffusion Distillation</p> -->
+    <h1 class="hero-title">
+      <span class="grad">Mask Forcing</span><span class="hero-title-sep">:</span>
+      <span class="hero-subtitle-inline">Improving Autoregressive Video Diffusion Distillation
+      via Dual-Noise Masking Rollout</span>
+    </h1>
+
+    <div class="authors">
+      <span class="author"><a href="https://alicezrzhao.github.io/">Zhuoran Zhao</a><sup>1,2</sup></span>
+      <span class="author"><a href="http://thesouthfrog.com/about.me/">Shengju Qian</a><sup>3</sup></span>
+      <span class="author"><a href="https://tongtongliang.github.io/">Tongtong Liang</a><sup>4</sup></span>
+      <span class="author"><a href="https://refkxh.github.io/">Xianghao Kong</a><sup>2</sup></span>
+      <span class="author"><a href="https://franklinz233.github.io/">Songchun Zhang</a><sup>2</sup></span>
+      <span class="author"><a href="https://junchao-cs.github.io/">Junchao Huang</a><sup>5</sup></span>
+      <span class="author"><a href="https://enderfga.cn/">Guian Fang</a><sup>6</sup></span>
+      <span class="author"><a href="https://scholar.google.com/citations?user=2Z1GJ50AAAAJ&hl=en">Xin Wang</a><sup>3</sup></span>
+      <span class="author"><a href="https://panhui.people.ust.hk/index.html">Pan Hui</a><sup>1,2</sup></span>
+      <span class="author"><a href="https://anyirao.com/">Anyi Rao</a><sup>2</sup></span>
+    </div>
+
+    <div class="affiliations">
+      <span><sup>1</sup>HKUST(GZ)</span>
+      <span><sup>2</sup>HKUST</span>
+      <span><sup>3</sup>LIGHTSPEED</span>
+      <span><sup>4</sup>UCSD</span>
+      <span><sup>5</sup>CUHK(SZ)</span>
+      <span><sup>6</sup>NUS</span>
+    </div>
+
+    <div class="hero-links">
+      <a class="btn" href="#"><i class="fas fa-file-pdf"></i><span>Paper</span></a>
+      <a class="btn" href="#"><i class="ai ai-arxiv"></i><span>arXiv</span></a>
+      <a class="btn" href="#"><i class="fab fa-github"></i><span>Code</span></a>
+      <a class="btn btn-ghost" href="#comparisons"><i class="fas fa-clapperboard"></i><span>Video Results</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================ ABSTRACT ============================ -->
+<section class="section" id="abstract">
+  <div class="container container-narrow">
+    <h2 class="section-title">Abstract</h2>
+    <div class="prose">
+      <p>
+        Autoregressive (AR) video diffusion models have shown great potential in real-time video
+        generation. Recent methods distill pretrained bidirectional video diffusion models into causal
+        AR students through Distribution Matching Distillation (DMD), but the generated videos often
+        suffer from over-saturation and over-smoothing issues, resulting in limited visual quality and
+        realism. The primary cause is the mode-seeking behavior of the reverse KL objective in DMD,
+        which can cause the student distribution to collapse onto only a few modes of the bidirectional
+        teacher distribution. To address this, we propose <b>Mask Forcing</b>, a <b>Dual-Noise Masking
+        Rollout</b> strategy that perturbs the AR student self-rollout to alleviate the mode-seeking
+        behavior. The core idea is to inject cleaner signals into noisy rollout inputs via random masks
+        along spatial and temporal axes during the self-rollout process of AR diffusion distillation.
+        Such perturbations encourage the student rollouts to explore more regions of the teacher
+        distribution, allowing DMD to provide learning signals beyond the modes already covered by the
+        student. Moreover, the cleaner tokens act as denoising guidance for other noisier tokens,
+        improving the mid-rollout predictions and reducing error accumulation. Extensive experiments
+        demonstrate that our method significantly improves multiple AR video diffusion distillation
+        methods with higher visual quality efficiently, without incorporating real video data or
+        additional post-training stages.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ METHOD ============================ -->
+<section class="section section-alt" id="method">
+  <div class="container">
+    <h2 class="section-title">Method</h2>
+    <p class="section-lead">
+      Mask Forcing perturbs the student rollout trajectory through dual-noise masking, encouraging
+      broader teacher-mode coverage while providing cleaner context for denoising noisy tokens.
+    </p>
+
+    <figure class="figure figure-pipeline">
+      <picture>
+        <source type="image/webp"
+                srcset="static/images/pipeline-1200.webp?v=11 1200w,
+                        static/images/pipeline-2400.webp?v=11 2400w,
+                        static/images/pipeline-3600.webp?v=11 3600w"
+                sizes="(max-width: 1240px) calc(100vw - 56px), 1184px">
+        <img src="static/images/pipeline.png?v=11"
+             width="2400" height="1110"
+             alt="Method overview: standard self-rollout versus dual-noise masking rollout"
+             loading="eager" decoding="async">
+      </picture>
+      <figcaption>
+        <b>(a)</b> Standard self-rollout DMD training suffers from mode collapse due to the mode-seeking
+        reverse-KL objective, resulting in over-saturation and limited realism.
+        <b>(b)</b> Mask Forcing perturbs the student rollout trajectory through dual-noise masking rollout,
+        encouraging broader teacher-mode coverage while providing cleaner context for denoising noisy tokens.
+      </figcaption>
+    </figure>
+
+    <div class="callout">
+      <i class="fas fa-circle-info"></i>
+      <p>Mask Forcing acts during the self-rollout DMD training stage, and requires no changes to the
+      model architecture, the teacher, or the inference procedure. It can therefore be
+      <b>integrated into</b> existing AR distillation pipelines in both <b>chunk-wise</b> and
+      <b>frame-wise</b> settings.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ COMPARISONS ============================ -->
+<section class="section" id="comparisons">
+  <div class="container">
+    <h2 class="section-title">Qualitative Comparisons</h2>
+    <p class="section-lead">
+      Side-by-side comparisons against three AR distillation baselines. In every clip the
+      <b>left</b> half is the baseline and the <b>right</b> half is the same baseline
+      <b>+ Mask Forcing</b>.
+    </p>
+
+    <!-- gallery controls -->
+    <div class="gallery-controls">
+      <div class="control-group">
+        <span class="control-label">Jump to</span>
+        <div class="tabs" id="tabsJump"></div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Speed</span>
+        <div class="tabs tabs-sm" id="tabsSpeed">
+          <button class="tab is-active" data-speed="1">1&times;</button>
+          <button class="tab" data-speed="1.5">1.5&times;</button>
+          <button class="tab" data-speed="2">2&times;</button>
+        </div>
+      </div>
+      <div class="control-group control-group-end">
+        <button class="tab tab-icon" id="btnToggleAll" title="Play or pause every visible clip">
+          <i class="fas fa-pause"></i><span>Pause all</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="videoSections"></div>
+    <div class="gallery-empty" id="galleryEmpty" hidden>No clips available.</div>
+  </div>
+</section>
+
+<!-- ============================ LONG VIDEO ============================ -->
+<section class="section section-alt" id="longvideo">
+  <div class="container">
+    <h2 class="section-title">Single-Prompt Long Video</h2>
+    <p class="section-lead">
+      We integrate Mask Forcing into both the initialization and the streaming long-video tuning stages
+      of LongLive, and evaluate 30-second generation. In every clip the <b>left</b> half is LongLive and
+      the <b>right</b> half is LongLive <b>+ Mask Forcing</b>.
+    </p>
+    <div class="video-grid" id="longVideoGrid"></div>
+    <div class="gallery-empty" id="longVideoEmpty" hidden>No long-video clips available.</div>
+  </div>
+</section>
+
+<!-- ============================ QUANTITATIVE ============================ -->
+<section class="section" id="quantitative">
+  <div class="container">
+    <h2 class="section-title">Quantitative Results</h2>
+    <p class="section-lead">
+      Across both chunk-wise and frame-wise settings, Mask Forcing brings <b>consistent gains</b> in
+      visual quality (HPSv3, Vision.) and instruction following (Instruct.), along with improvements
+      on the VBench metrics.
+    </p>
+
+    <h3 class="table-title">
+      Table 1 &middot; 100-Prompt Set and VBench, chunk-wise and frame-wise settings
+    </h3>
+    <div class="table-wrap">
+      <table class="results">
+        <thead>
+          <tr>
+            <th class="col-method">Method</th>
+            <th>HPSv3 <span class="up">&uarr;</span></th>
+            <th>Vision. <span class="up">&uarr;</span></th>
+            <th>Instruct. <span class="up">&uarr;</span></th>
+            <th>MQ <span class="up">&uarr;</span></th>
+            <th>Dynamic. <span class="up">&uarr;</span></th>
+            <th class="col-div">Total <span class="up">&uarr;</span></th>
+            <th>Quality <span class="up">&uarr;</span></th>
+            <th>Semantic <span class="up">&uarr;</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-row"><td colspan="9"><em>Chunk-wise</em></td></tr>
+          <tr>
+            <td class="col-method">Self Forcing</td>
+            <td>9.55</td><td>10.10</td><td>38.50</td><td>15.88</td>
+            <td>70</td><td class="col-div">81.89</td><td>82.99</td><td>77.49</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>9.84<i class="d up">+.29</i></td>
+            <td>11.37<i class="d up">+1.27</i></td>
+            <td>45.03<i class="d up">+6.53</i></td>
+            <td>20.49<i class="d up">+4.61</i></td>
+            <td>82<i class="d up">+12</i></td>
+            <td class="col-div">82.61<i class="d up">+.72</i></td>
+            <td>83.68<i class="d up">+.69</i></td>
+            <td>78.74<i class="d up">+1.25</i></td>
+          </tr>
+          <tr>
+            <td class="col-method">Causal Forcing</td>
+            <td>9.37</td><td>10.36</td><td>40.41</td><td>17.73</td>
+            <td>76</td><td class="col-div">82.67</td><td>83.58</td><td>78.98</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>10.17<i class="d up">+.80</i></td>
+            <td>11.58<i class="d up">+1.22</i></td>
+            <td>46.30<i class="d up">+5.89</i></td>
+            <td>21.54<i class="d up">+3.81</i></td>
+            <td>82<i class="d up">+6</i></td>
+            <td class="col-div">82.76<i class="d up">+.09</i></td>
+            <td>83.69<i class="d up">+.11</i></td>
+            <td>79.01<i class="d up">+.03</i></td>
+          </tr>
+          <tr>
+            <td class="col-method">LongLive</td>
+            <td>9.11</td><td>10.77</td><td>42.48</td><td>21.20</td>
+            <td>76</td><td class="col-div">82.02</td><td>82.87</td><td>78.66</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>10.14<i class="d up">+1.03</i></td>
+            <td>11.00<i class="d up">+.23</i></td>
+            <td>42.65<i class="d up">+.17</i></td>
+            <td>22.34<i class="d up">+1.14</i></td>
+            <td>69<i class="d down">&minus;7</i></td>
+            <td class="col-div">82.75<i class="d up">+.73</i></td>
+            <td>83.71<i class="d up">+.84</i></td>
+            <td>78.91<i class="d up">+.25</i></td>
+          </tr>
+
+          <tr class="group-row"><td colspan="9"><em>Frame-wise</em></td></tr>
+          <tr>
+            <td class="col-method">Self Forcing</td>
+            <td>9.34</td><td>9.45</td><td>35.62</td><td>18.27</td>
+            <td>53</td><td class="col-div">80.73</td><td>81.72</td><td>76.78</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>9.79<i class="d up">+.45</i></td>
+            <td>10.49<i class="d up">+1.04</i></td>
+            <td>39.60<i class="d up">+3.98</i></td>
+            <td>19.07<i class="d up">+.80</i></td>
+            <td>61<i class="d up">+8</i></td>
+            <td class="col-div">81.49<i class="d up">+.76</i></td>
+            <td>82.55<i class="d up">+.83</i></td>
+            <td>77.23<i class="d up">+.45</i></td>
+          </tr>
+          <tr>
+            <td class="col-method">Causal Forcing</td>
+            <td>9.67</td><td>10.58</td><td>37.56</td><td>20.25</td>
+            <td>28</td><td class="col-div">80.64</td><td>81.55</td><td>77.00</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>9.96<i class="d up">+.29</i></td>
+            <td>10.71<i class="d up">+.13</i></td>
+            <td>39.60<i class="d up">+2.04</i></td>
+            <td>23.69<i class="d up">+3.44</i></td>
+            <td>52<i class="d up">+24</i></td>
+            <td class="col-div">82.28<i class="d up">+1.64</i></td>
+            <td>83.19<i class="d up">+1.64</i></td>
+            <td>78.62<i class="d up">+1.62</i></td>
+          </tr>
+          <tr>
+            <td class="col-method">LongLive</td>
+            <td>9.19</td><td>9.35</td><td>38.50</td><td>12.14</td>
+            <td>25</td><td class="col-div">83.91</td><td>81.86</td><td>77.41</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>9.46<i class="d up">+.27</i></td>
+            <td>10.55<i class="d up">+1.20</i></td>
+            <td>42.78<i class="d up">+4.28</i></td>
+            <td>19.32<i class="d up">+7.18</i></td>
+            <td>76<i class="d up">+51</i></td>
+            <td class="col-div">84.51<i class="d up">+.60</i></td>
+            <td>82.33<i class="d up">+.47</i></td>
+            <td>78.05<i class="d up">+.64</i></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">
+      Left block: 100-prompt set (HPSv3; VisionReward sub-scores Vision. / Instruct. / MQ; Dynamic Degree
+      via RAFT). Right block: VBench Total / Quality / Semantic over 946 standard prompts. All metrics are
+      scaled by 100 for readability except HPSv3. The lower Dynamic Degree for LongLive is attributable to
+      generic VBench rewarding drift-induced optical flow.
+    </p>
+
+    <h3 class="table-title">
+      Table 2 &middot; Single-prompt 30s long video, MovieGen and VBench-Long
+    </h3>
+    <div class="table-wrap">
+      <table class="results">
+        <thead>
+          <tr>
+            <th class="col-method">Method</th>
+            <th>HPSv3 <span class="up">&uarr;</span></th>
+            <th>Vision. <span class="up">&uarr;</span></th>
+            <th>Instruct. <span class="up">&uarr;</span></th>
+            <th>MQ <span class="up">&uarr;</span></th>
+            <th>Dynamic. <span class="up">&uarr;</span></th>
+            <th class="col-div">Total <span class="up">&uarr;</span></th>
+            <th>Quality <span class="up">&uarr;</span></th>
+            <th>Semantic <span class="up">&uarr;</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-method">LongLive</td>
+            <td>8.44</td><td>14.31</td><td>62.04</td><td>18.84</td>
+            <td>70</td><td class="col-div">83.91</td><td>84.71</td><td>80.70</td>
+          </tr>
+          <tr class="ours-row">
+            <td class="col-method">+ Ours</td>
+            <td>9.11<i class="d up">+.67</i></td>
+            <td>14.93<i class="d up">+.62</i></td>
+            <td>66.02<i class="d up">+3.98</i></td>
+            <td>19.37<i class="d up">+.53</i></td>
+            <td>64<i class="d down">&minus;6</i></td>
+            <td class="col-div">84.51<i class="d up">+.60</i></td>
+            <td>85.28<i class="d up">+.57</i></td>
+            <td>81.44<i class="d up">+.74</i></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="table-title">Convergence Speed</h3>
+    <figure class="figure figure-narrow">
+      <picture>
+        <source type="image/webp"
+                srcset="static/images/convergence-1200.webp?v=3 1200w,
+                        static/images/convergence-2400.webp?v=3 2400w"
+                sizes="(max-width: 940px) calc(100vw - 56px), 880px">
+        <img src="static/images/convergence.png?v=3"
+             width="2400" height="1709"
+             alt="HPSv3, CMMD and VMMD over training steps for three baselines with and without Mask Forcing"
+             loading="lazy" decoding="async">
+      </picture>
+      <figcaption>
+        Training dynamics across all three baselines (columns) under three metrics (rows):
+        <b>HPSv3</b> for human-preference visual quality, together with <b>CMMD</b> (CLIP Maximum Mean
+        Discrepancy) and <b>VMMD</b> (V-JEPA2 Maximum Mean Discrepancy) measured against a fixed teacher
+        reference set. Incorporating Mask Forcing (<b>+ Ours</b>, red) leads to <b>faster convergence</b>
+        and a better operating point throughout training, in both visual quality and distributional
+        alignment.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ ABLATIONS ============================ -->
+<section class="section section-alt" id="ablations">
+  <div class="container">
+    <h2 class="section-title">Ablation Studies</h2>
+    <p class="section-lead">
+      All ablations use the 100-prompt set with Self Forcing as the baseline. We report <b>HPSv3</b> and <b>Dynamic Degree</b> jointly to expose
+      the visual-quality / motion trade-off. <span class="chip">Bold</span> marks our default setting.
+    </p>
+
+    <div class="ablation-grid">
+      <div class="ablation-card">
+        <h3>Table 3 &middot; Mask ratio <span class="mono">α</span></h3>
+        <table class="results results-sm">
+          <thead>
+            <tr><th><span class="mono">α</span></th><th>HPSv3 <span class="up">&uarr;</span></th><th>Dynamic. <span class="up">&uarr;</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0.1</td><td>10.00</td><td>47</td></tr>
+            <tr class="pick-row"><td>0.2</td><td>9.84</td><td>82</td></tr>
+            <tr><td>0.3</td><td>9.82</td><td>65</td></tr>
+            <tr><td>0.4</td><td>10.15</td><td>57</td></tr>
+            <tr><td>0.5</td><td>10.17</td><td>44</td></tr>
+          </tbody>
+        </table>
+        <p class="ablation-note">
+          Small ratios induce near-identical rollouts and weak motion. Large ratios lean too heavily on
+          cleaner student predictions — top HPSv3, but dynamics collapse to 44. <b>0.2</b> perturbs enough
+          to diversify trajectories while keeping the highest Dynamic Degree.
+        </p>
+      </div>
+
+      <div class="ablation-card">
+        <h3>Table 4 &middot; Timestep window <span class="mono">Δ</span></h3>
+        <table class="results results-sm">
+          <thead>
+            <tr><th><span class="mono">Δ</span></th><th>HPSv3 <span class="up">&uarr;</span></th><th>Dynamic. <span class="up">&uarr;</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><td>50</td><td>9.16</td><td>92</td></tr>
+            <tr><td>150</td><td>9.82</td><td>70</td></tr>
+            <tr class="pick-row"><td>250</td><td>9.84</td><td>82</td></tr>
+            <tr><td>450</td><td>9.98</td><td>80</td></tr>
+            <tr><td>600</td><td>9.90</td><td>67</td></tr>
+          </tbody>
+        </table>
+        <p class="ablation-note">
+          The window controls how much cleaner the injected tokens are. <b>250</b> gives the best joint
+          operating point between visual quality and motion dynamics.
+        </p>
+      </div>
+
+      <div class="ablation-card ablation-card-wide">
+        <h3>Table 5 &middot; Mask scheme</h3>
+        <table class="results results-sm">
+          <thead>
+            <tr><th class="col-method">Spatial, temporal</th><th>HPSv3 <span class="up">&uarr;</span></th><th>Dynamic. <span class="up">&uarr;</span></th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="col-method">shared, per-rollout</td><td>10.12</td><td>56</td></tr>
+            <tr><td class="col-method">shared, per-chunk</td><td>9.84</td><td>81</td></tr>
+            <tr><td class="col-method">shared, per-step</td><td>9.64</td><td>72</td></tr>
+            <tr><td class="col-method">per-frame, per-rollout</td><td>10.03</td><td>53</td></tr>
+            <tr class="pick-row"><td class="col-method">per-frame, per-chunk</td><td>9.84</td><td>82</td></tr>
+            <tr><td class="col-method">per-frame, per-step</td><td>9.93</td><td>74</td></tr>
+          </tbody>
+        </table>
+        <p class="ablation-note">
+          <b>Spatially</b>, <em>shared</em> reuses one mask for all frames in a chunk while <em>per-frame</em>
+          samples independently. <b>Temporally</b>, <em>per-rollout</em> fixes the mask for the whole rollout,
+          <em>per-chunk</em> resamples per chunk, and <em>per-step</em> resamples at every denoising step.
+          An effective scheme should diversify the student distribution enough to improve teacher-mode coverage
+          without deviating from the teacher — <b>per-frame + per-chunk</b> hits that balance.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close"><i class="fas fa-xmark"></i></button>
+  <div class="lightbox-inner">
+    <video id="lightboxVideo" controls loop playsinline></video>
+    <p class="lightbox-caption" id="lightboxCaption"></p>
+  </div>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Back to top"><i class="fas fa-arrow-up"></i></button>
+
+<script src="static/js/videos.js"></script>
+<script src="static/js/main.js"></script>
+</body>
+</html>
