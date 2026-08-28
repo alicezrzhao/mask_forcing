@@ -367,15 +367,17 @@
     video.addEventListener('loadeddata', syncPlayState);
     syncPlayState();
 
-    // prompt overlay: sits just under the in-video label bar, shown on hover
-    var caption = el('div', 'video-caption');
-    caption.appendChild(el('p', 'video-caption-text'));
-    caption.querySelector('.video-caption-text').textContent = item.prompt;
-    shell.appendChild(caption);
-
     shell.appendChild(makeScrubber(video));
 
     card.appendChild(shell);
+
+    // prompt: overlays the frame on hover (pointer devices), or flows below the
+    // clip as plain text on touch devices -- it lives outside .video-shell so the
+    // static layout is not clipped by the shell's fixed aspect-ratio box
+    var caption = el('div', 'video-caption');
+    caption.appendChild(el('p', 'video-caption-text'));
+    caption.querySelector('.video-caption-text').textContent = item.prompt;
+    card.appendChild(caption);
 
     loadObserver.observe(video);
     playObserver.observe(video);
