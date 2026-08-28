@@ -913,17 +913,17 @@ table.results-sm thead th { background: var(--bg-alt); }
   .spec > div { grid-template-columns: 1fr; gap: 4px; }
   .lightbox { padding: 16px; }
   .lightbox-close { top: 10px; right: 12px; }
-  .video-actions { opacity: 1; }
 }
 
-/* Touch devices have no hover, so the prompt can never be revealed on demand.
-   The clip box is very wide (1668/524), which leaves only ~110px of height on a
-   phone -- an overlay would swallow the whole frame. Flow the prompt below the
-   video as plain text instead, and keep the scrubber visible. */
+/* Touch devices have no hover, so neither the prompt nor the buttons can ever be
+   revealed on demand -- hiding them would make them unreachable. The clip box is
+   very wide (1668/524), leaving only ~110px of height on a phone, so anything
+   floating over the frame swallows it. Move both out into a strip below the clip
+   and keep the scrubber visible. */
 @media (hover: none) {
   .video-caption {
     position: static;
-    padding: 11px 14px 13px;
+    padding: 11px 14px 9px;
     background: var(--bg-sunken);
     border-top: 1px solid var(--line);
     color: var(--ink-soft);
@@ -937,6 +937,17 @@ table.results-sm thead th { background: var(--bg-alt); }
     -webkit-line-clamp: 3;
     line-clamp: 3;
   }
+
+  /* same strip, right-aligned under the prompt text */
+  .video-actions {
+    position: static;
+    justify-content: flex-end;
+    padding: 0 14px 11px;
+    background: var(--bg-sunken);
+    opacity: 1;
+  }
+  .icon-btn { width: 36px; height: 36px; font-size: .85rem; }
+
   .video-scrub { opacity: 1; }
 }
 

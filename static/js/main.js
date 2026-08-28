@@ -345,7 +345,6 @@
     actions.appendChild(playBtn);
     actions.appendChild(restartBtn);
     actions.appendChild(expandBtn);
-    shell.appendChild(actions);
 
     // big center badge, only visible while this clip is paused
     var pausedBadge = el('div', 'video-paused', '<i class="fas fa-play"></i>');
@@ -378,6 +377,10 @@
     caption.appendChild(el('p', 'video-caption-text'));
     caption.querySelector('.video-caption-text').textContent = item.prompt;
     card.appendChild(caption);
+
+    // same trick for the button row: floated over the frame on hover, but moved
+    // out into the strip below the clip where there is no hover to reveal it
+    card.appendChild(actions);
 
     loadObserver.observe(video);
     playObserver.observe(video);
