@@ -9,10 +9,6 @@ window.VIDEO_GROUPS = [
         "prompt": "In spring on a hillside above a bright lake, a woman in a light yellow dress and straw hat dominates the frame in cinematic 4K. She picks wildflowers, then lifts the bouquet toward the lens as the camera glides closer to her joyful expression. Behind her, water shimmers, small boats drift, and mountains soften into blue haze. Sharp textures, true tones, and gentle film grain create a warm, uplifting beauty."
       },
       {
-        "src": "videos/Self_Forcing/an adorable kangaroo wearing blue jeans and a white t shirt taking a pleasant stroll in Antarctica d.mp4",
-        "prompt": "an adorable kangaroo wearing blue jeans and a white t shirt taking a pleasant stroll in Antarctica during a beautiful sunset"
-      },
-      {
         "src": "videos/Self_Forcing/Across a snowfield under pink dawn, a skier in a crimson down jacket, fur-lined hood, and mirrored g.mp4",
         "prompt": "Across a snowfield under pink dawn, a skier in a crimson down jacket, fur-lined hood, and mirrored goggles dominates the frame in HDR 4K with sparkling ice detail. First, she plants her poles and adjusts the strap of a small camera on her chest, breath puffing in the cold. Then she pushes off, carves a wide S-curve through powder, and throws a spray of snow toward the lens as the camera follows low and fast, mountains glowing and the sky vast and stunning."
       },
@@ -35,6 +31,10 @@ window.VIDEO_GROUPS = [
       {
         "src": "videos/Self_Forcing/A horse wearing roller skates, gracefully gliding through a city park..mp4",
         "prompt": "A horse wearing roller skates, gracefully gliding through a city park."
+      },
+      {
+        "src": "videos/Self_Forcing/an adorable kangaroo wearing blue jeans and a white t shirt taking a pleasant stroll in Antarctica d.mp4",
+        "prompt": "an adorable kangaroo wearing blue jeans and a white t shirt taking a pleasant stroll in Antarctica during a beautiful sunset"
       },
       {
         "src": "videos/Self_Forcing/A corgi wearing sunglasses walks on the beach of a tropical island.mp4",
@@ -83,12 +83,12 @@ window.VIDEO_GROUPS = [
         "prompt": "A close-up shot of the person's face reveals his fear and desperation as he navigates the ship through the storm."
       },
       {
-        "src": "videos/LongLive/Along a canyon rim at sunrise, a climber in a burnt-orange jacket, chalky hands, and a braided rope .mp4",
-        "prompt": "Along a canyon rim at sunrise, a climber in a burnt-orange jacket, chalky hands, and a braided rope coils fills the frame in sharp 4K with warm stone detail. First, she tightens her harness buckle and tests a carabiner, eyes fixed on the route as ravens circle below. Then she steps onto the rock, pulls upward in a steady rhythm, and reaches a ledge to raise one fist, the camera pulling back to reveal a river ribbon and vast, glowing cliffs."
-      },
-      {
         "src": "videos/LongLive/A cat mermaid swimming under the sea..mp4",
         "prompt": "A cat mermaid swimming under the sea."
+      },
+      {
+        "src": "videos/LongLive/On a winter sunrise above a frozen fjord, a mountaineer in an orange down suit and mirrored goggles .mp4",
+        "prompt": "On a winter sunrise above a frozen fjord, a mountaineer in an orange down suit and mirrored goggles dominates the frame in ultra clean UHD. He tightens his harness, then steps onto a ridge as wind lifts powder into glittering sheets. The camera holds close on breath mist and frost on his lashes, then reveals blue ice, dark water cuts, and distant peaks glowing pink. Every seam, strap, and snow crystal reads sharply, with subtle film grain grounding the grandeur."
       },
       {
         "src": "videos/LongLive/A stunning mid-afternoon landscape photograph with a low camera angle, showcasing several giant wool.mp4",
@@ -127,8 +127,8 @@ window.VIDEO_GROUPS = [
         "prompt": "Inside a candlelit cathedral, a choir soloist in a dark green velvet gown fills the shot in ultra-realistic 4K with gold icons and floating dust. First, she takes a careful breath, rests her hand on a carved rail, and listens as the organ settles into silence. Then she sings a clear sustained note and walks forward one step, the camera drifting closer as stained glass glows, candle flames tremble, and the space feels grand and intimate. with natural skin tones."
       },
       {
-        "src": "videos/LongLive/On a desert salt flat under a vast starry sky, a traveler in a white hooded cloak with embroidered t.mp4",
-        "prompt": "On a desert salt flat under a vast starry sky, a traveler in a white hooded cloak with embroidered trim dominates the frame in HDR 4K with crisp salt patterns. First, he lights a small lantern and shields the flame with both hands as wind whispers across the ground. Then he raises the lantern high and walks forward, the camera pulling back to reveal his reflection in a thin mirror of water, constellations above and below, the world surreal yet photoreal."
+        "src": "videos/LongLive/A leaf falling onto a calm pond, creating ripples..mp4",
+        "prompt": "A leaf falling onto a calm pond, creating ripples."
       }
     ]
   },

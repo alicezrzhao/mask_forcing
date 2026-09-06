@@ -105,8 +105,8 @@
         generation. Recent methods distill pretrained bidirectional video diffusion models into causal
         AR students through Distribution Matching Distillation (DMD), but the generated videos often
         suffer from over-saturation and over-smoothing issues, resulting in limited visual quality and
-        realism. The primary cause is the mode-seeking behavior of the reverse KL objective in DMD,
-        which can cause the student distribution to collapse onto only a few modes of the bidirectional
+        realism. The key contributing factor is the mode-seeking behavior of the reverse KL objective
+        in DMD, which can cause the student distribution to collapse onto only a few modes of the
         teacher distribution. To address this, we propose <b>Mask Forcing</b>, a <b>Dual-Noise Masking
         Rollout</b> strategy that perturbs the AR student self-rollout to alleviate the mode-seeking
         behavior. The core idea is to inject cleaner signals into noisy rollout inputs via random masks
@@ -114,10 +114,10 @@
         Such perturbations encourage the student rollouts to explore more regions of the teacher
         distribution, allowing DMD to provide learning signals beyond the modes already covered by the
         student. Moreover, the cleaner tokens act as denoising guidance for other noisier tokens,
-        improving the mid-rollout predictions and reducing error accumulation. Extensive experiments
-        demonstrate that our method significantly improves multiple AR video diffusion distillation
-        methods with higher visual quality efficiently, without incorporating real video data or
-        additional post-training stages.
+        improving the intermediate rollout predictions and reducing error accumulation. Extensive
+        experiments demonstrate that our method significantly improves multiple AR video diffusion
+        distillation methods with higher visual quality efficiently, without incorporating real video
+        data or additional post-training stages.
       </p>
     </div>
   </div>
@@ -135,12 +135,12 @@
     <figure class="figure figure-pipeline">
       <picture>
         <source type="image/webp"
-                srcset="static/images/pipeline-1200.webp?v=11 1200w,
-                        static/images/pipeline-2400.webp?v=11 2400w,
-                        static/images/pipeline-3600.webp?v=11 3600w"
+                srcset="static/images/pipeline-1200.webp?v=12 1200w,
+                        static/images/pipeline-2400.webp?v=12 2400w,
+                        static/images/pipeline-3600.webp?v=12 3600w"
                 sizes="(max-width: 1240px) calc(100vw - 56px), 1184px">
-        <img src="static/images/pipeline.png?v=11"
-             width="2400" height="1110"
+        <img src="static/images/pipeline.png?v=12"
+             width="2400" height="1108"
              alt="Method overview: standard self-rollout versus dual-noise masking rollout"
              loading="eager" decoding="async">
       </picture>
@@ -327,7 +327,7 @@
           <tr>
             <td class="col-method">LongLive</td>
             <td>9.19</td><td>9.35</td><td>38.50</td><td>12.14</td>
-            <td>25</td><td class="col-div">83.91</td><td>81.86</td><td>77.41</td>
+            <td>25</td><td class="col-div">80.97</td><td>81.86</td><td>77.41</td>
           </tr>
           <tr class="ours-row">
             <td class="col-method">+ Ours</td>
@@ -336,7 +336,7 @@
             <td>42.78<i class="d up">+4.28</i></td>
             <td>19.32<i class="d up">+7.18</i></td>
             <td>76<i class="d up">+51</i></td>
-            <td class="col-div">84.51<i class="d up">+.60</i></td>
+            <td class="col-div">81.47<i class="d up">+.50</i></td>
             <td>82.33<i class="d up">+.47</i></td>
             <td>78.05<i class="d up">+.64</i></td>
           </tr>
@@ -344,10 +344,8 @@
       </table>
     </div>
     <p class="table-note">
-      Left block: 100-prompt set (HPSv3; VisionReward sub-scores Vision. / Instruct. / MQ; Dynamic Degree
-      via RAFT). Right block: VBench Total / Quality / Semantic over 946 standard prompts. All metrics are
-      scaled by 100 for readability except HPSv3. The lower Dynamic Degree for LongLive is attributable to
-      generic VBench rewarding drift-induced optical flow.
+      Left block: 100-prompt set (HPSv3; VisionReward sub-scores Vision. / Instruct. / MQ; Dynamic Degree). Right block: VBench Total / Quality / Semantic. All metrics are
+      scaled by 100 for readability except HPSv3.
     </p>
 
     <h3 class="table-title">
@@ -402,11 +400,12 @@
              loading="lazy" decoding="async">
       </picture>
       <figcaption>
-        Training dynamics across all three baselines (columns) under three metrics (rows):
+        Evaluation curves over training steps for all three baselines (columns) under three
+        metrics (rows):
         <b>HPSv3</b> for human-preference visual quality, together with <b>CMMD</b> (CLIP Maximum Mean
         Discrepancy) and <b>VMMD</b> (V-JEPA2 Maximum Mean Discrepancy) measured against a fixed teacher
         reference set. Incorporating Mask Forcing (<b>+ Ours</b>, red) leads to <b>faster convergence</b>
-        and a better operating point throughout training, in both visual quality and distributional
+        and consistently better metric values at every training step, in both visual quality and distributional
         alignment.
       </figcaption>
     </figure>
