@@ -42,6 +42,7 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="#abstract">Abstract</a></li>
       <li><a href="#method">Method</a></li>
+      <li><a href="#convergence">Convergence</a></li>
       <li><a href="#comparisons">Comparisons</a></li>
       <li><a href="#longvideo">Long Video</a></li>
       <li><a href="#quantitative">Quantitative</a></li>
@@ -115,7 +116,7 @@
         distribution, allowing DMD to provide learning signals beyond the modes already covered by the
         student. Moreover, the cleaner tokens act as denoising guidance for other noisier tokens,
         improving the intermediate rollout predictions and reducing error accumulation. Extensive
-        experiments demonstrate that our method significantly improves multiple AR video diffusion
+        experiments demonstrate that our method improves multiple AR video diffusion
         distillation methods with higher visual quality efficiently, without incorporating real video
         data or additional post-training stages.
       </p>
@@ -162,8 +163,42 @@
   </div>
 </section>
 
+<!-- ======================== CONVERGENCE SPEED ======================== -->
+<section class="section" id="convergence">
+  <div class="container">
+    <h2 class="section-title">Convergence Speed</h2>
+    <p class="section-lead">
+      Metric curves over the first 2000 distillation steps for three AR distillation baselines. In
+      every panel the <b>blue</b> curve is the baseline and the <b>red</b> curve is the same baseline
+      <b>+ Mask Forcing</b>.
+    </p>
+
+    <figure class="figure figure-narrow">
+      <picture>
+        <source type="image/webp"
+                srcset="static/images/convergence-1200.webp?v=3 1200w,
+                        static/images/convergence-2400.webp?v=3 2400w"
+                sizes="(max-width: 940px) calc(100vw - 56px), 880px">
+        <img src="static/images/convergence.png?v=3"
+             width="2400" height="1709"
+             alt="HPSv3, CMMD and VMMD over training steps for three baselines with and without Mask Forcing"
+             loading="lazy" decoding="async">
+      </picture>
+      <figcaption>
+        Evaluation curves over training steps for all three baselines (columns) under three
+        metrics (rows):
+        <b>HPSv3</b> for human-preference visual quality, together with <b>CMMD</b> (CLIP Maximum Mean
+        Discrepancy) and <b>VMMD</b> (V-JEPA2 Maximum Mean Discrepancy) measured against a fixed teacher
+        reference set. Incorporating Mask Forcing (<b>+ Ours</b>, red) leads to <b>faster convergence</b>
+        and consistently better metric values across training steps, in both visual quality and distributional
+        alignment.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- ============================ COMPARISONS ============================ -->
-<section class="section" id="comparisons">
+<section class="section section-alt" id="comparisons">
   <div class="container">
     <h2 class="section-title">Qualitative Comparisons</h2>
     <p class="section-lead">
@@ -199,7 +234,7 @@
 </section>
 
 <!-- ============================ LONG VIDEO ============================ -->
-<section class="section section-alt" id="longvideo">
+<section class="section" id="longvideo">
   <div class="container">
     <h2 class="section-title">Single-Prompt Long Video</h2>
     <p class="section-lead">
@@ -213,7 +248,7 @@
 </section>
 
 <!-- ============================ QUANTITATIVE ============================ -->
-<section class="section" id="quantitative">
+<section class="section section-alt" id="quantitative">
   <div class="container">
     <h2 class="section-title">Quantitative Results</h2>
     <p class="section-lead">
@@ -386,34 +421,11 @@
         </tbody>
       </table>
     </div>
-
-    <h3 class="table-title">Convergence Speed</h3>
-    <figure class="figure figure-narrow">
-      <picture>
-        <source type="image/webp"
-                srcset="static/images/convergence-1200.webp?v=3 1200w,
-                        static/images/convergence-2400.webp?v=3 2400w"
-                sizes="(max-width: 940px) calc(100vw - 56px), 880px">
-        <img src="static/images/convergence.png?v=3"
-             width="2400" height="1709"
-             alt="HPSv3, CMMD and VMMD over training steps for three baselines with and without Mask Forcing"
-             loading="lazy" decoding="async">
-      </picture>
-      <figcaption>
-        Evaluation curves over training steps for all three baselines (columns) under three
-        metrics (rows):
-        <b>HPSv3</b> for human-preference visual quality, together with <b>CMMD</b> (CLIP Maximum Mean
-        Discrepancy) and <b>VMMD</b> (V-JEPA2 Maximum Mean Discrepancy) measured against a fixed teacher
-        reference set. Incorporating Mask Forcing (<b>+ Ours</b>, red) leads to <b>faster convergence</b>
-        and consistently better metric values at every training step, in both visual quality and distributional
-        alignment.
-      </figcaption>
-    </figure>
   </div>
 </section>
 
 <!-- ============================ ABLATIONS ============================ -->
-<section class="section section-alt" id="ablations">
+<section class="section" id="ablations">
   <div class="container">
     <h2 class="section-title">Ablation Studies</h2>
     <p class="section-lead">
