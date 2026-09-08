@@ -19,6 +19,52 @@
     return n;
   }
 
+  /* ================================ THEME =============================== */
+  // Placed before everything else: the gallery block below can return early,
+  // and the toggle must work even on a page with no clips.
+  (function () {
+    var toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+
+    var root = document.documentElement;
+    var KEY = 'mf-theme';
+
+    function stored() {
+      try { return localStorage.getItem(KEY); } catch (e) { return null; }
+    }
+
+    // No explicit choice yet -> fall back to whatever the OS asks for.
+    function active() {
+      var t = root.getAttribute('data-theme');
+      if (t === 'dark' || t === 'light') return t;
+      return window.matchMedia &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function label() {
+      var next = active() === 'dark' ? 'light' : 'dark';
+      toggle.title = 'Switch to ' + next + ' theme';
+      toggle.setAttribute('aria-pressed', String(active() === 'dark'));
+    }
+
+    toggle.addEventListener('click', function () {
+      var next = active() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(KEY, next); } catch (e) {}
+      label();
+    });
+
+    // Track the OS setting only while the visitor has no preference of their own.
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var onChange = function () { if (!stored()) label(); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    }
+
+    label();
+  })();
+
   /* ============================== NAVIGATION ============================= */
   var nav = document.getElementById('nav');
   var navLinks = document.getElementById('navLinks');
